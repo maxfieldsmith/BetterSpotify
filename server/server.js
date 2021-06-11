@@ -42,6 +42,7 @@ app.post("/login", (req, res) => {
   spotifyApi
     .authorizationCodeGrant(code)
     .then((data) => {
+      console.log("made it here");
       res.json({
         accessToken: data.body.access_token,
         refreshToken: data.body.refresh_token,
@@ -49,6 +50,7 @@ app.post("/login", (req, res) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       res.sendStatus(400);
     });
 });
@@ -60,4 +62,19 @@ app.get("/lyrics", async (req, res) => {
   res.json({ lyrics });
 });
 
-app.listen(process.env.PORT || 3001);
+if (process.env.NODE_ENV === "production") {
+  // Express will serve up production assests
+  // like our main.js file or main.css file
+  app.use(express.static("client/build"));
+
+  // Express will serve up the index.html file
+  // if it doesnt recognize the route
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+  });
+}
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(PORT);
+});
